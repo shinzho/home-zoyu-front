@@ -1,6 +1,6 @@
 <template>
   <div>
-        <v-app-bar class="toolbar" color="black" hide-on-scroll="true">
+    <v-app-bar class="toolbar" color="black" fixed flat>
       <strong
         ><h2>
           <span class="title">zo<span style="color: red;">yu</span></span>
@@ -14,19 +14,31 @@
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" app right temporary>
       <v-list dense>
-        <v-list-item link>
+        <v-list-item @click="someMethod" link v-if="username==null">
+          <v-list-item-action><v-icon>mdi-login</v-icon></v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Sign in with Google</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item link v-if="username!==null">
           <v-list-item-action>
             <v-icon>mdi-face</v-icon>
           </v-list-item-action>
 
           <v-list-item-content>
-            <v-list-item-title>Username(edit)</v-list-item-title>
+            <v-list-item-title >{{username}}(edit)</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item link @click="logout" v-if="username!==null">
+          
+          <v-list-item-content>
+            <v-list-item-title >Log Out</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
         <v-list-item link>
           <v-list-item-action>
-           <v-icon>list</v-icon>
+            <v-icon>list</v-icon>
           </v-list-item-action>
 
           <v-list-item-content>
@@ -40,9 +52,18 @@
 
 <script>
 export default {
+  props: ['username'],
   data: () => ({
     drawer: null,
   }),
+  methods: {
+    someMethod() {
+      this.$emit("send-message");
+    },
+    logout(){
+      localStorage.clear()
+    }
+  },
 };
 </script>
 
