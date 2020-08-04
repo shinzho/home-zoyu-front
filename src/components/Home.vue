@@ -345,9 +345,9 @@
 
         <div>
           <v-row v-for="choice in poll.choice_set" v-bind:key="choice.id"
-            ><v-col cols="10" class="my-0 py-0" v-on:click="upvote(choice)"
+            ><v-col cols="10" class="my-0 py-0" 
               ><v-checkbox
-                
+                @change="upvote(choice)"
                 class="mx-4 mt-1 mb-0"
                 :label="choice.choice_text"
                 color="red darken-3"
@@ -431,9 +431,9 @@ export default {
       let checked = false;  
       let user= JSON.parse(localStorage.user_details)
       if (localStorage.user_details) {
-        console.log("checking" ,user[0].id, choice.upvoted_by.length);
+        //console.log("checking" ,user[0].id, choice.upvoted_by.length);
         if (choice.upvoted_by.includes(user[0].id)) {
-          console.log("checked")
+          //console.log("checked")
           checked = true;
         }
       }
@@ -454,9 +454,16 @@ export default {
       };
 
       axios(config)
-        .then(function (response) {
-          console.log(JSON.stringify(response.data));
-          
+        .then( (response)=> {
+          console.log(response.data);
+          if(response.data=="Upvoted"){
+            choice.upvoted_by.push(this.user_details.id)
+            //console.log("increased by 1")
+          }
+          if(response.data=="Removed"){
+            choice.upvoted_by.pop(this.user_details.id)
+            //console.log("removed by 1")
+          }
         })
         .catch(function (error) {
           console.log(error);
@@ -495,6 +502,8 @@ export default {
             upvoted_by: [],
           });
           this.pollAnswer[qid] = "";
+          this.getPolls("all");
+          vm.$forceUpdate();
         })
         .catch(function (error) {
           console.log(error);
@@ -530,7 +539,7 @@ export default {
             question_text: this.pollText,
             tags: this.pollTags.tag_text,
           });
-          this.getPolls();
+          this.getPolls("all");
           window.alert("Post submmitted successfully!");
         })
         .catch(function (error) {
