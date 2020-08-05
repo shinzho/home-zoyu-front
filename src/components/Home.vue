@@ -2,12 +2,15 @@
   <div id="app" class="back">
     <v-app id="inspire">
       <Navbar
-        @send-message="handleClickSignIn"
+        @sign-in="handleClickSignIn"
+        @sign-out="handleClickSignOut"
         v-if="user_details !== null"
         v-bind:username="user_details[0].username"
+        v-bind:user="user_details"
       ></Navbar>
       <Navbar
-        @send-message="handleClickSignIn"
+      @sign-out="handleClickSignOut"
+        @sign-in="handleClickSignIn"
         v-if="user_details === null"
         v-bind:username="null"
       ></Navbar>
@@ -594,6 +597,11 @@ export default {
         });
       // this.django_auth = response.data;
       // localStorage.django_tokens = JSON.stringify(this.django_auth);
+    },
+    handleClickSignOut(){
+      localStorage.clear();
+      this.user_details= null
+      vm.$forceUpdate();
     },
     handleClickSignIn() {
       //self= this
