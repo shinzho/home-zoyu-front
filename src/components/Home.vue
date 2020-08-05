@@ -9,7 +9,7 @@
         v-bind:user="user_details"
       ></Navbar>
       <Navbar
-      @sign-out="handleClickSignOut"
+        @sign-out="handleClickSignOut"
         @sign-in="handleClickSignIn"
         v-if="user_details === null"
         v-bind:username="null"
@@ -159,7 +159,6 @@
                     <v-btn color="blue darken-1" text @click="dialog = false"
                       >Apply</v-btn
                     ><v-spacer></v-spacer>
-                    
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -351,6 +350,7 @@
                 color="red darken-3"
                 :input-value="checkedOrNot(choice)"
                 hide-details
+                :disabled="user_details==null"
               ></v-checkbox></v-col
             ><v-col
               class="my-0 py-0"
@@ -427,9 +427,9 @@ export default {
     };
   },
   methods: {
-    filterByTag(){
-      console.log("id of tag selected",this.filterTag)
-      this.getPolls("all", this.filterTag)
+    filterByTag() {
+      console.log("id of tag selected", this.filterTag);
+      this.getPolls("all", this.filterTag);
     },
     reversePolls() {
       console.log("sort_order", this.sort_order);
@@ -451,7 +451,7 @@ export default {
     },
     upvote: function (choice) {
       var data = JSON.stringify({ choice_id: choice.id });
-
+      
       var config = {
         method: "post",
         url: "http://127.0.0.1:8000/upvoteChoices",
@@ -476,6 +476,7 @@ export default {
         })
         .catch(function (error) {
           console.log(error);
+          
         });
     },
     disabledAnswer: function (qid) {
@@ -511,11 +512,12 @@ export default {
             upvoted_by: [],
           });
           this.pollAnswer[qid] = "";
-          this.getPolls("all",-1);
+          this.getPolls("all", -1);
           vm.$forceUpdate();
         })
         .catch(function (error) {
           console.log(error);
+          window.alert("Please Sign in first.")
         });
     },
     postPoll() {
@@ -548,12 +550,12 @@ export default {
             question_text: this.pollText,
             tags: this.pollTags.tag_text,
           });
-          this.getPolls("all",-1);
+          this.getPolls("all", -1);
           window.alert("Post submmitted successfully!");
         })
         .catch(function (error) {
           console.log(error);
-          window.alert("There was an error, Please try again later.");
+          window.alert("Please Sign in first.");
         });
       this.post = false;
       (this.pollTags = ""), (this.pollText = "");
@@ -598,9 +600,9 @@ export default {
       // this.django_auth = response.data;
       // localStorage.django_tokens = JSON.stringify(this.django_auth);
     },
-    handleClickSignOut(){
+    handleClickSignOut() {
       localStorage.clear();
-      this.user_details= null
+      this.user_details = null;
       vm.$forceUpdate();
     },
     handleClickSignIn() {
@@ -642,7 +644,7 @@ export default {
         });
     },
 
-    getPolls: function (user_id,tag_id) {
+    getPolls: function (user_id, tag_id) {
       var config = {
         method: "post",
         url: "http://127.0.0.1:8000/getQuestions",
@@ -650,7 +652,7 @@ export default {
           "Content-Type": "application/json",
           //...data.getHeaders(),
         },
-        data: { user_id: user_id , tag_id: tag_id},
+        data: { user_id: user_id, tag_id: tag_id },
       };
 
       axios(config)
