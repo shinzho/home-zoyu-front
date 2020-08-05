@@ -134,21 +134,18 @@
                             :items="['Newer Posts First', 'Older Posts First']"
                             label="Sort by Post Time"
                             required
+                            v-model="sort_order"
+                            @change="reversePolls()"
                           ></v-select>
                         </v-col>
                         <v-col cols="12" sm="6">
                           <v-autocomplete
-                            :items="[
-                              'Depression',
-                              'Carrer',
-                              'Marrige Problems',
-                              'Body Image',
-                              'Anxiety',
-                              'Addiction',
-                              'General',
-                            ]"
-                            label="Tags"
-                            multiple
+                            :items="tags"
+                            label="Filter by Tag"
+                            item-text="tag_text"
+                            item-value="id"
+                            v-model="filterTag"
+                            @change="filterByTag()"
                           ></v-autocomplete>
                         </v-col>
                       </v-row>
@@ -157,11 +154,9 @@
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="dialog = false"
-                      >Close</v-btn
-                    >
-                    <v-btn color="blue darken-1" text @click="dialog = false"
-                      >Save</v-btn
-                    >
+                      >Apply</v-btn
+                    ><v-spacer></v-spacer>
+                    
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -345,7 +340,7 @@
 
         <div>
           <v-row v-for="choice in poll.choice_set" v-bind:key="choice.id"
-            ><v-col cols="10" class="my-0 py-0" 
+            ><v-col cols="10" class="my-0 py-0"
               ><v-checkbox
                 @change="upvote(choice)"
                 class="mx-4 mt-1 mb-0"
@@ -424,13 +419,24 @@ export default {
       pollTags: "",
       pollText: "",
       pollAnswer: {},
+      sort_order: "Newer Posts First",
+      filterTag: "",
     };
   },
   methods: {
+    filterByTag(){
+      console.log("id of tag selected",this.filterTag)
+      this.getPolls("all", this.filterTag)
+    },
+    reversePolls() {
+      console.log("sort_order", this.sort_order);
+      this.questions.reverse();
+    },
     checkedOrNot: function (choice) {
-      let checked = false;  
-      let user= JSON.parse(localStorage.user_details)
+      let checked = false;
       if (localStorage.user_details) {
+        let user = JSON.parse(localStorage.user_details);
+
         //console.log("checking" ,user[0].id, choice.upvoted_by.length);
         if (choice.upvoted_by.includes(user[0].id)) {
           //console.log("checked")
@@ -454,14 +460,14 @@ export default {
       };
 
       axios(config)
-        .then( (response)=> {
+        .then((response) => {
           console.log(response.data);
-          if(response.data=="Upvoted"){
-            choice.upvoted_by.push(this.user_details.id)
+          if (response.data == "Upvoted") {
+            choice.upvoted_by.push(this.user_details.id);
             //console.log("increased by 1")
           }
-          if(response.data=="Removed"){
-            choice.upvoted_by.pop(this.user_details.id)
+          if (response.data == "Removed") {
+            choice.upvoted_by.pop(this.user_details.id);
             //console.log("removed by 1")
           }
         })
@@ -502,7 +508,7 @@ export default {
             upvoted_by: [],
           });
           this.pollAnswer[qid] = "";
-          this.getPolls("all");
+          this.getPolls("all",-1);
           vm.$forceUpdate();
         })
         .catch(function (error) {
@@ -539,7 +545,7 @@ export default {
             question_text: this.pollText,
             tags: this.pollTags.tag_text,
           });
-          this.getPolls("all");
+          this.getPolls("all",-1);
           window.alert("Post submmitted successfully!");
         })
         .catch(function (error) {
@@ -628,7 +634,7 @@ export default {
         });
     },
 
-    getPolls: function (user_id) {
+    getPolls: function (user_id,tag_id) {
       var config = {
         method: "post",
         url: "http://127.0.0.1:8000/getQuestions",
@@ -636,7 +642,7 @@ export default {
           "Content-Type": "application/json",
           //...data.getHeaders(),
         },
-        data: { user_id: user_id },
+        data: { user_id: user_id , tag_id: tag_id},
       };
 
       axios(config)
@@ -670,10 +676,13 @@ export default {
     },
   },
   created() {
-    this.getPolls("all");
+    this.getPolls("all", -1);
     this.getTags();
-    this.user_details = JSON.parse(localStorage.user_details);
-    this.django_auth = JSON.parse(localStorage.django_tokens);
+    if (localStorage.user_details) {
+      this.user_details = JSON.parse(localStorage.user_details);
+      this.django_auth = JSON.parse(localStorage.django_tokens);
+    }
+
     for (let i = 0; i < this.questions.length; i++) {
       let qid = this.questions[i][id];
       this.pollAnswer.qid = "";
