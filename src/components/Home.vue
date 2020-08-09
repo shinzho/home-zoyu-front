@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="back">
+  <div id="app" class="">
     <v-app id="inspire">
       <Navbar
         @sign-in="handleClickSignIn"
@@ -169,7 +169,7 @@
         </div>
       </div>
 
-      <v-card color="transparent" class="mx-auto mt-4">
+      <!-- <v-card color="transparent" class="mx-auto mt-4">
         <v-row
           ><div class="ml-6 mt-2"><i>username</i></div>
           <v-spacer></v-spacer>
@@ -234,7 +234,7 @@
               cols="2"
               class="pl-0 pr-9"
               style="text-align: right; white-space: pre; color: red;"
-              >212<v-icon color="red">whatshot</v-icon></v-col
+              >212<v-icon color="red">thumb_up</v-icon></v-col
             ></v-row
           >
           <v-row
@@ -250,7 +250,7 @@
               cols="2"
               class="pl-0"
               style="text-align: left; white-space: pre; color: red;"
-              >22<v-icon color="red">whatshot</v-icon></v-col
+              >22<v-icon color="red">thumb_up</v-icon></v-col
             ></v-row
           >
           <v-row
@@ -266,7 +266,7 @@
               cols="2"
               class="pl-0"
               style="text-align: left; white-space: pre; color: red;"
-              >452<v-icon color="red">whatshot</v-icon></v-col
+              >452<v-icon color="red">thumb_up</v-icon></v-col
             ></v-row
           >
         </div>
@@ -296,7 +296,7 @@
             >
           </v-row>
         </div>
-      </v-card>
+      </v-card> -->
       <v-card
         v-for="poll in questions"
         v-bind:key="poll.id"
@@ -327,9 +327,9 @@
                 max-width: max-content;
               "
             >
-              <strong style="padding-inline: 10px;">{{
+              <h5 style="padding-inline: 10px;">{{
                 tag["tag_text"]
-              }}</strong>
+              }}</h5>
             </div>
           </div></v-row
         >
@@ -350,15 +350,15 @@
                 color="red darken-3"
                 :input-value="checkedOrNot(choice)"
                 hide-details
-                :disabled="user_details==null"
+                :disabled="user_details == null"
               ></v-checkbox></v-col
             ><v-col
-              class="my-0 py-0"
+              class="my-0 py-0 pl-0"
               v-if="Object.keys(choice.upvoted_by).length != 0"
               cols="2"
               style="text-align: center; color: red;"
               >{{ choice.upvoted_by.length
-              }}<v-icon color="red">whatshot</v-icon></v-col
+              }}<v-icon class="pb-2 pr-1" color="red">thumb_up</v-icon></v-col
             ></v-row
           >
         </div>
@@ -373,6 +373,7 @@
                 filled
                 rounded
                 dense
+                counter="40"
               ></v-text-field>
             </v-col>
             <v-col cols="2" class="pt-5 px-0"
@@ -451,7 +452,7 @@ export default {
     },
     upvote: function (choice) {
       var data = JSON.stringify({ choice_id: choice.id });
-      
+
       var config = {
         method: "post",
         url: "http://127.0.0.1:8000/upvoteChoices",
@@ -476,13 +477,15 @@ export default {
         })
         .catch(function (error) {
           console.log(error);
-          
         });
     },
     disabledAnswer: function (qid) {
       let disabled = true;
-      if (this.pollAnswer[qid]) {
+      if (this.pollAnswer[qid] ) {
         disabled = false;
+        if(this.pollAnswer[qid].length>40){
+          disabled= true
+        }
       }
 
       return disabled;
@@ -517,7 +520,9 @@ export default {
         })
         .catch(function (error) {
           console.log(error);
-          window.alert("Please Sign in first.")
+          if (localStorage.user_details == null) {
+            window.alert("Please Sign in first.");
+          }
         });
     },
     postPoll() {
@@ -555,7 +560,10 @@ export default {
         })
         .catch(function (error) {
           console.log(error);
-          window.alert("Please Sign in first.");
+
+          if (user_details == null) {
+            window.alert("Please Sign in first.");
+          }
         });
       this.post = false;
       (this.pollTags = ""), (this.pollText = "");
@@ -580,7 +588,7 @@ export default {
       var config = {
         method: "post",
         url:
-          "http://localhost:8000/auth/convert-token?grant_type=convert_token&client_id=olSMA6272EP5jp3yM419emocc3wbPS51ZdJyyEvL&client_secret=Of19YcDHQ7U0uyXAx4CFmDHf7tgF7d4VnePWKJRIC8eO7hA5vbaOLQ62NJEXdTzmIcM5cNraU8lizPmLFoqsDqgfcFsuVc39P5QNKq7is3OZ6d0LXXfV6Up0bvl8TMHB&backend=google-oauth2&token=" +
+          "http://127.0.0.1:8000/auth/convert-token?grant_type=convert_token&client_id=olSMA6272EP5jp3yM419emocc3wbPS51ZdJyyEvL&client_secret=Of19YcDHQ7U0uyXAx4CFmDHf7tgF7d4VnePWKJRIC8eO7hA5vbaOLQ62NJEXdTzmIcM5cNraU8lizPmLFoqsDqgfcFsuVc39P5QNKq7is3OZ6d0LXXfV6Up0bvl8TMHB&backend=google-oauth2&token=" +
           this.googleToken,
         headers: {},
       };
@@ -626,7 +634,7 @@ export default {
     getUserDetails: function (token) {
       var config = {
         method: "get",
-        url: "http://localhost:8000/me/",
+        url: "http://127.0.0.1:8000/me/",
         headers: {
           Authorization: "Bearer " + token,
         },
